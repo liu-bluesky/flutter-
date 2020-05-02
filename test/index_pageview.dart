@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/material.dart';
 import 'package:provide/provide.dart';
@@ -17,7 +18,6 @@ class IndexPage extends StatefulWidget {
 
 class _IndexPageState extends State<IndexPage> with TickerProviderStateMixin {
   AnimationController _animationController;
-  
   Animation _animationHeight;
   CurvedAnimation _curvedAnimation; //曲线动画
   double _top = 0.0; //距顶部的偏移
@@ -38,20 +38,14 @@ class _IndexPageState extends State<IndexPage> with TickerProviderStateMixin {
     _scrollController.addListener(() {
       print(
           "大盒子距离底部位置${ScreenUtil().setHeight(_scrollController.offset.abs())}");
-      //只要大盒子偏移小盒子就不能动
-      if (_scrollController.offset > 0.0) {
-           Provide.value<ConfigPageProvide>(context).getisNever(false);
-      }
+
       if (_scrollController.offset <= 0.0) {
         Provide.value<ConfigPageProvide>(context).getisScrollerBottom(true);
-      
-
         print('object2');
       } else if (ScreenUtil().setHeight(_scrollController.offset) >
           ScreenUtil().setHeight(200)) {
         print('object1');
         Provide.value<ConfigPageProvide>(context).getisScrollerBottom(false);
-            
       }
     });
   }
@@ -74,12 +68,10 @@ class _IndexPageState extends State<IndexPage> with TickerProviderStateMixin {
       builder: (context, child, value) {
         return Scaffold(
             body: Listener(
-              onPointerDown:(e){
-              },
                 onPointerUp: (e) {
-                         Provide.value<ConfigPageProvide>(context).getisNever(true);
+                  // print(value.isScrollerTop);
                   print("_top${_top}");
-                  print("isUp${value.isUp }${value.isScrollerTop}");
+                  print("isUp${value.isUp}");
                   if (value.isScrollerTop && !value.isUp) {
                     //判断是否底部偏移量是否大于指定大小
                     if (ScreenUtil().setHeight(_top.floor()) >
@@ -88,19 +80,18 @@ class _IndexPageState extends State<IndexPage> with TickerProviderStateMixin {
                       // 事放动画返回0
                       // 大盒子动画到最上面
                       print(screenHeight);
-             
+
                       _scrollController.animateTo(screenHeight,
                           duration: Duration(milliseconds: 500),
-                          curve: Curves.easeInOut);
+                          curve: Curves.easeIn);
                       value.getisUp(true);
                       print("进来了1");
                     } else {
                       //  回复原状
                       print("进来了2");
-                         
                       _scrollController.animateTo(0.0,
                           duration: Duration(milliseconds: 100),
-                          curve: Curves.easeInOut);
+                          curve: Curves.easeIn);
                     }
                   } else if (value.isScrollerTop && value.isUp) {
                     if (ScreenUtil().setHeight(screenHeight) -
@@ -117,14 +108,14 @@ class _IndexPageState extends State<IndexPage> with TickerProviderStateMixin {
                       // print(_statusBarHeight);
                       _scrollController.animateTo(0.0,
                           duration: Duration(milliseconds: 500),
-                          curve: Curves.easeInOut);
+                          curve: Curves.easeIn);
                       value.getisUp(false);
                     } else {
                       print("进来了4");
                       //  回复原状
                       _scrollController.animateTo(screenHeight,
                           duration: Duration(milliseconds: 500),
-                          curve: Curves.easeInOut);
+                          curve: Curves.easeIn);
                     }
                   }
                   setState(() {
@@ -137,11 +128,13 @@ class _IndexPageState extends State<IndexPage> with TickerProviderStateMixin {
                   //如果在顶部 或者 大盒子的滚动位置不在底部就滚动大盒子滚动体
 
                   if (value.isScrollerTop && value.isScrollerBottom) {
+                    print(value.isScrollerBottom);
                     setState(() {
                       _top += e.delta.dy;
                     });
                     _scrollController.jumpTo(_top <= 0.0 ? 0.0 : _top);
                   } else if (!value.isScrollerTop && !value.isScrollerBottom) {
+                    print(value.isScrollerBottom);
                     setState(() {
                       _top -= e.delta.dy;
                     });
@@ -156,70 +149,50 @@ class _IndexPageState extends State<IndexPage> with TickerProviderStateMixin {
                   //   _top = 0;
                   // }
                 },
-                child: SingleChildScrollView(
-                  //滑动的方向 Axis.vertical为垂直方向滑动，Axis.horizontal 为水平方向
+                child:PageView(
                   scrollDirection: Axis.vertical,
-                  controller: _scrollController,
-                  //true 滑动到底部
-                  reverse: true,
-                  padding: EdgeInsets.all(0.0),
-                  ////滑动到底部回弹效果BouncingScrollPhysics(),
-                  // NeverScrollableScrollPhysics() 禁止滚动
-                  physics: value.currentIndex == 0
-                      ? null
-                      : NeverScrollableScrollPhysics(),
-                  child: Column(
-                    children: <Widget>[
-                      // 小程序桌面 start
+                 reverse:false,
+                   physics:null,
+                  children: <Widget>[
+
+                    Container(
+                      color: Colors.red,
+                     
+                      child: Column(
+                        children: <Widget>[
+                       
+                          Container(
+                          color: Colors.black38,
+                       height: ScreenUtil().setHeight(1334)-ScreenUtil().setHeight(120),
+                          child:    ListView.builder(
+                      
+                        itemCount: 20,
+                        //如果大盒子不在底部就禁止滚动小盒子滚动体
+                    
+                        // controller: _scrollController,
+                        itemBuilder: (context, index) {
+                          return ListTile(
+                            title: Text("$index"),
+                          );
+                        })
+
+                        )
+                        ,
+
+                        Container(
+                          color: Colors.black38,
+                          height: ScreenUtil().setHeight(120),
+                          child: Text("底部切换导航"),
+
+                        )
+                        ],
+                      )
+                    ),
                       Container(
-                        color: Color.fromRGBO(215, 215, 215, 1),
-                        margin: EdgeInsets.only(top: 10),
-                        height: ScreenUtil().setHeight(1334),
-                      ),
-                      // 小程序桌面 end
-                      //  微信 底部导航页面 start
-                      Container(
-                          color: Colors.green,
-                          height: ScreenUtil().setHeight(1334),
-                          child: Container(
-                            child: Column(
-                              children: <Widget>[
-                                ConstrainedBox(
-                                  constraints: BoxConstraints.expand(
-                                      height: ScreenUtil().setHeight(1334) -
-                                          ScreenUtil().setHeight(120)),
-                                  child: IndexedStack(
-                                    index: value.currentIndex,
-                                    children: tabBodies,
-                                  ),
-                                ),
-                                ConstrainedBox(
-                                  constraints: BoxConstraints.expand(
-                                      height: ScreenUtil().setHeight(120)),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                        border: Border(
-                                            top: BorderSide(
-                                      width: ScreenUtil().setHeight(1),
-                                      color: Color.fromRGBO(210, 210, 210, 1),
-                                    ))),
-                                    padding: EdgeInsets.only(
-                                      left: ScreenUtil().setWidth(10),
-                                      right: ScreenUtil().setWidth(10),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      children: bottomNavBar(value),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          )),
-                      //  微信 底部导航页面 end
-                    ],
-                  ),
+                          color: Colors.black87,
+                      child: Text('1'),
+                    )
+                  ],
                 )
                 //  Center(
                 //   child:

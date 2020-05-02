@@ -2,6 +2,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/material.dart';
 import 'package:provide/provide.dart';
 import 'package:weixin/pages/address_list/index.dart';
+import 'package:weixin/pages/bottom_nav_bar.dart';
 import 'package:weixin/pages/find/index.dart';
 import 'package:weixin/pages/me/index.dart';
 import 'package:weixin/pages/weixin/index.dart';
@@ -17,7 +18,6 @@ class IndexPage extends StatefulWidget {
 
 class _IndexPageState extends State<IndexPage> with TickerProviderStateMixin {
   AnimationController _animationController;
-  
   Animation _animationHeight;
   CurvedAnimation _curvedAnimation; //曲线动画
   double _top = 0.0; //距顶部的偏移
@@ -38,20 +38,14 @@ class _IndexPageState extends State<IndexPage> with TickerProviderStateMixin {
     _scrollController.addListener(() {
       print(
           "大盒子距离底部位置${ScreenUtil().setHeight(_scrollController.offset.abs())}");
-      //只要大盒子偏移小盒子就不能动
-      if (_scrollController.offset > 0.0) {
-           Provide.value<ConfigPageProvide>(context).getisNever(false);
-      }
+
       if (_scrollController.offset <= 0.0) {
         Provide.value<ConfigPageProvide>(context).getisScrollerBottom(true);
-      
-
         print('object2');
       } else if (ScreenUtil().setHeight(_scrollController.offset) >
           ScreenUtil().setHeight(200)) {
         print('object1');
         Provide.value<ConfigPageProvide>(context).getisScrollerBottom(false);
-            
       }
     });
   }
@@ -74,12 +68,10 @@ class _IndexPageState extends State<IndexPage> with TickerProviderStateMixin {
       builder: (context, child, value) {
         return Scaffold(
             body: Listener(
-              onPointerDown:(e){
-              },
                 onPointerUp: (e) {
-                         Provide.value<ConfigPageProvide>(context).getisNever(true);
+                  // print(value.isScrollerTop);
                   print("_top${_top}");
-                  print("isUp${value.isUp }${value.isScrollerTop}");
+                  print("isUp${value.isUp}");
                   if (value.isScrollerTop && !value.isUp) {
                     //判断是否底部偏移量是否大于指定大小
                     if (ScreenUtil().setHeight(_top.floor()) >
@@ -88,19 +80,18 @@ class _IndexPageState extends State<IndexPage> with TickerProviderStateMixin {
                       // 事放动画返回0
                       // 大盒子动画到最上面
                       print(screenHeight);
-             
+
                       _scrollController.animateTo(screenHeight,
                           duration: Duration(milliseconds: 500),
-                          curve: Curves.easeInOut);
+                          curve: Curves.easeIn);
                       value.getisUp(true);
                       print("进来了1");
                     } else {
                       //  回复原状
                       print("进来了2");
-                         
                       _scrollController.animateTo(0.0,
                           duration: Duration(milliseconds: 100),
-                          curve: Curves.easeInOut);
+                          curve: Curves.easeIn);
                     }
                   } else if (value.isScrollerTop && value.isUp) {
                     if (ScreenUtil().setHeight(screenHeight) -
@@ -117,14 +108,14 @@ class _IndexPageState extends State<IndexPage> with TickerProviderStateMixin {
                       // print(_statusBarHeight);
                       _scrollController.animateTo(0.0,
                           duration: Duration(milliseconds: 500),
-                          curve: Curves.easeInOut);
+                          curve: Curves.easeIn);
                       value.getisUp(false);
                     } else {
                       print("进来了4");
                       //  回复原状
                       _scrollController.animateTo(screenHeight,
                           duration: Duration(milliseconds: 500),
-                          curve: Curves.easeInOut);
+                          curve: Curves.easeIn);
                     }
                   }
                   setState(() {
@@ -137,11 +128,13 @@ class _IndexPageState extends State<IndexPage> with TickerProviderStateMixin {
                   //如果在顶部 或者 大盒子的滚动位置不在底部就滚动大盒子滚动体
 
                   if (value.isScrollerTop && value.isScrollerBottom) {
+                    print(value.isScrollerBottom);
                     setState(() {
                       _top += e.delta.dy;
                     });
                     _scrollController.jumpTo(_top <= 0.0 ? 0.0 : _top);
                   } else if (!value.isScrollerTop && !value.isScrollerBottom) {
+                    print(value.isScrollerBottom);
                     setState(() {
                       _top -= e.delta.dy;
                     });

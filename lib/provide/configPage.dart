@@ -9,9 +9,10 @@ class ConfigPageProvide  with ChangeNotifier{
     currentIndex = newIndex;
     notifyListeners();
   }
-   bool isClose = true;
-  getisClose(bool newisClose){
-    isClose = newisClose;
+  // 判断当前是否不在底部 isNever
+   bool isNever = true;
+  getisNever(bool newval){
+    isNever = newval;
     notifyListeners();
   }
   /**
@@ -31,10 +32,10 @@ class ConfigPageProvide  with ChangeNotifier{
     isScrollerBottom = newisScrollerBottom;
     notifyListeners();
   }
-  // 小盒子
-    ScrollController scrollController = new ScrollController();
-     getscrollController(bool newval){
-    isScrollerBottom = newval;
+  // 微信页面显示的位置
+    bool isUp=false;
+     getisUp(bool newval){
+    isUp = newval;
     notifyListeners();
   }
   //微信页盒子偏移量
